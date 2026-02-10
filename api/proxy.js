@@ -1,4 +1,9 @@
-const html = `<!DOCTYPE html>
+export const config = {
+    runtime: "edge",
+};
+
+export default async function handler(req) {
+    const html = `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -53,45 +58,45 @@ const html = `<!DOCTYPE html>
     checkHostAndRedirect();
 </script>
 </html>`;
-const isFile = (url: string) => {
-	try {
-		const pathname = new URL(url).pathname;
-		const segments = pathname.split('/').filter(Boolean);
-		const lastSegment = segments[segments.length - 1];
-		return lastSegment ? lastSegment.includes('.') : false;
-	} catch {
-		return false;
-	}
-}
 
-const proxy = async (request: Request, origin: string) => {
-	const parsedUrl = new URL(request.url);
-			const targetUrl = `https://${origin}${parsedUrl.pathname}${parsedUrl.search}`;
-			const response = await fetch(targetUrl, {
-				headers: request.headers,
-				method: request.method,
-				body: request.body,
-			});
-			const headers = new Headers(response.headers);
-			return new Response(response.body, {
-				status: response.status,
-				statusText: response.statusText,
-				headers,
-			});
+    const isFile = (url) => {
+        try {
+            const pathname = new URL(url).pathname;
+            const segments = pathname.split("/").filter(Boolean);
+            const lastSegment = segments[segments.length - 1];
+            return lastSegment ? lastSegment.includes(".") : false;
+        } catch {
+            return false;
+        }
+    };
+    const proxy = async (req, origin) => {
+        const parsedUrl = new URL(req.url);
+        const targetUrl = `https://${origin}${parsedUrl.pathname}${parsedUrl.search}`;
+        const response = await fetch(targetUrl, {
+            headers: req.headers,
+            method: req.method,
+            body: req.body,
+        });
+        const headers = new Headers(response.headers);
+        return new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers,
+        });
+    };
+    const url = req.url;
+    if (isFile(url) || req.method !== "GET") {
+        return proxy(req, 'cfwww.zecrimp.top');
+    } else {
+        const parsedHosts = ["https://cfwww.zecrimp.top", "https://esa.zecrimp.top", "https://vercel.zecrimp.top"];
+        const htmlWithHosts = html.replace(
+            "__HOSTS_PLACEHOLDER__",
+            JSON.stringify(parsedHosts),
+        );
+        return new Response(htmlWithHosts, {
+            headers: {
+                "Content-Type": "text/html",
+            },
+        });
+    }
 }
-export default {
-	async fetch(request, env, ctx): Promise<Response> {
-		const url = request.url;
-		if (isFile(url) || request.method !== 'GET') {
-			return proxy(request, env.origin);
-		} else {
-			const parsedHosts = JSON.parse(env.hosts);
-			const htmlWithHosts = html.replace('__HOSTS_PLACEHOLDER__', JSON.stringify(parsedHosts));
-			return new Response(htmlWithHosts, {
-				headers: {
-					'Content-Type': 'text/html',
-				},
-			});
-		}
-	},
-} satisfies ExportedHandler<Cloudflare.Env>;

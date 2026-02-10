@@ -1,5 +1,5 @@
 const html = `<!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -41,9 +41,9 @@ const html = `<!DOCTYPE html>
         const requests = urls.map(url => sendHeadRequest(url));
 
         try {
-            const result = await Promise.race(requests);
-            console.log(\`最快响应的URL是: \${result.url}，响应时间: \${result.responseTime}ms\`);
-            window.location.href = result.url + suffix;
+            const result = await Promise.any(requests);
+            console.log("最快响应的URL是: " + result.url + " ，响应时间: " + result.responseTime + "ms");
+            // window.location.href = result.url + suffix;
         } catch (error) {
             console.error('所有请求均失败:', error);
             document.querySelector('h2').textContent = '所有分流地址均不可用';

@@ -48,7 +48,7 @@ export default async function handler(req) {
         try {
             const result = await Promise.any(requests);
             console.log("最快响应的URL是: " + result.url + " ，响应时间: " + result.responseTime + "ms");
-            // window.location.href = result.url + suffix;
+            window.location.href = result.url + suffix;
         } catch (error) {
             console.error('所有请求均失败:', error);
             document.querySelector('h2').textContent = '所有分流地址均不可用';

@@ -57,6 +57,8 @@ export default async function handler(req) {
 </script>
 </html>`;
 
+    const isSEOBot = (req) => req.headers.get("user-agent")?.includes("bot");
+
     const isFile = (url) => {
         try {
             const pathname = new URL(url).pathname;
@@ -83,10 +85,14 @@ export default async function handler(req) {
         });
     };
     const url = req.url;
-    if (isFile(url) || req.method !== "GET") {
-        return proxy(req, 'cfwww.zecrimp.top');
+    if (isFile(url) || isSEOBot(req) || req.method !== "GET") {
+        return proxy(req, "cfwww.zecrimp.top");
     } else {
-        const parsedHosts = ["https://cfwww.zecrimp.top", "https://esa.zecrimp.top", "https://vercel.zecrimp.top"];
+        const parsedHosts = [
+            "https://cfwww.zecrimp.top",
+            "https://vercel.zecrimp.top",
+            "https://esa.zecrimp.top",
+        ];
         const htmlWithHosts = html.replace(
             "__HOSTS_PLACEHOLDER__",
             JSON.stringify(parsedHosts),

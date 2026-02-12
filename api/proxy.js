@@ -38,9 +38,7 @@ export default async function handler(req) {
     }
 
     async function checkHostAndRedirect() {
-        const currentParams = new URLSearchParams(window.location.search);
-        const paramsString = currentParams.toString();
-        const suffix = paramsString ? '?' + paramsString : '';
+        const suffix = window.location.pathname + window.location.search;
 
         const urls = hosts;
         const requests = urls.map(url => sendHeadRequest(url));
